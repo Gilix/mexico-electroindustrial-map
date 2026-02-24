@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Despliegue Electroindustrial de M&eacute;xico desde 2022</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+
+  .header {
+    background: #fff;
+    padding: 20px 32px 16px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+  }
+
+  .legend-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #444;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s, transform 0.15s;
+    padding: 3px 6px;
+    border-radius: 3px;
+  }
+  .legend-item.dimmed {
+    opacity: 0.25;
+  }
+  .legend-item.highlighted {
+    opacity: 1;
+    background: rgba(0,0,0,0.05);
+    transform: scale(1.05);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
+
+  #map {
+    width: 100%;
+    height: calc(100vh - 160px);
+    min-height: 500px;
+    position: relative;
+  }
+
+  .footer {
+    background: #fff;
+    padding: 10px 32px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 11px;
+    color: #999;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Datawrapper-style hover tooltip */
+  #hover-tooltip {
+    position: absolute;
+    z-index: 2000;
+    pointer-events: none;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.55;
+    max-width: 290px;
+    display: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  #hover-tooltip .ht-cat-bar {
+    height: 3px;
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+  #hover-tooltip .ht-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+  }
+  #hover-tooltip .ht-cat {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  #hover-tooltip .ht-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 2px 0;
+    font-size: 12px;
+    color: #333;
+  }
+  #hover-tooltip .ht-label {
+    color: #999;
+    flex-shrink: 0;
+  }
+  #hover-tooltip .ht-val {
+    font-weight: 600;
+    text-align: right;
+  }
+  #hover-tooltip .ht-note {
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px solid #eee;
+    font-size: 11px;
+    color: #777;
+    line-height: 1.45;
+  }
+
+  .source-box {
+    position: absolute;
+    bottom: 50px;
+    right: 10px;
+    z-index: 1000;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 10px;
+    line-height: 1.6;
+    color: #666;
+    max-width: 280px;
+    pointer-events: auto;
+  }
+  .source-box .source-title {
+    font-weight: 700;
+    font-size: 10px;
+    color: #444;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .source-box a {
+    color: #005d7f;
+    text-decoration: none;
+  }
+  .source-box a:hover {
+    text-decoration: underline;
+  }
+  .source-box .source-note {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #e0e0e0;
+    font-size: 9px;
+    color: #999;
+    line-height: 1.5;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .stat-block { text-align: left; }
+  .stat-block .stat-val {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  .stat-block .stat-label {
+    font-size: 11px;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Despliegue Electroindustrial de M&eacute;xico desde 2022</h1>
+  <div class="subtitle">Principales proyectos anunciados y operativos en bater&iacute;as, veh&iacute;culos el&eacute;ctricos, centros de datos, semiconductores, energ&iacute;a solar, almacenamiento y aeroespacial/drones</div>
+  <div class="stats-bar" id="statsBar"></div>
+  <div style="margin-top: 12px;">
+    <div class="legend-bar" id="legendBar"></div>
+  </div>
+</div>
+
+<div id="map">
+  <div id="hover-tooltip"></div>
+</div>
+
+<div class="source-box">
+  <div class="source-title">Fuentes</div>
+  <a href="https://about.bnef.com/" target="_blank">Bloomberg NEF (BNEF)</a><br>
+  <a href="https://www.gob.mx/se" target="_blank">Secretar&iacute;a de Econom&iacute;a</a><br>
+  <a href="https://mexicobusiness.news/" target="_blank">Mexico Business News</a><br>
+  <a href="https://mexiconewsdaily.com/" target="_blank">Mexico News Daily</a><br>
+  <a href="https://mexico-now.com/" target="_blank">MexicoNow</a><br>
+  <a href="https://www.pv-tech.org/" target="_blank">PV Tech</a><br>
+  <a href="https://www.datamexico.org/" target="_blank">DataMexico</a><br>
+  Comunicados de prensa corporativos<br>
+  <span style="color:#999;margin-top:2px;display:inline-block">Compilado feb.&nbsp;2026 &middot; Gilberto Garc&iacute;a-Vazquez</span>
+  <div class="source-note">Nota: ~8 proyectos usan coordenadas aproximadas (bater&iacute;a Solarever en Jalisco, sitio planeado de BYD, Jetour en el Baj&iacute;o, programas nacionales). Estos est&aacute;n en fase de selecci&oacute;n de sitio o el parque industrial no ha sido divulgado p&uacute;blicamente.</div>
+</div>
+
+<div class="footer">
+  <span>Tama&ntilde;o del c&iacute;rculo proporcional a la inversi&oacute;n anunciada. Haga clic en la leyenda para aislar una categor&iacute;a. Pase el cursor sobre los marcadores para ver detalles.</span>
+  <span>Mapa &copy; OpenStreetMap &amp; CARTO</span>
+</div>
+
+<script>
+// ── CATEGORIES ──
+const CATEGORIES = {
+  "Manufactura VE":           { color: "#c4151c", order: 1 },
+  "Manufactura de bater\u00edas":  { color: "#00ac00", order: 2 },
+  "Centro de datos":          { color: "#005d7f", order: 3 },
+  "Semiconductores":          { color: "#f58228", order: 4 },
+  "Generaci\u00f3n solar":         { color: "#ffdd00", order: 5 },
+  "Manufactura solar":        { color: "#7fc6e5", order: 6 },
+  "Almacenamiento energ\u00eda":   { color: "#00adac", order: 7 },
+  "Aeroespacial / Drones":    { color: "#7b76ad", order: 8 }
+};
+
+const STATUS_MAP = {
+  "Operativo": "#00ac00",
+  "En construcci\u00f3n": "#f58228",
+  "Planeado": "#7fc6e5",
+  "Pausado": "#c4151c",
+  "En expansi\u00f3n": "#00adac",
+  "Anunciado": "#7b76ad",
+  "En desarrollo": "#888",
+  "Aprobado": "#005d7f"
+};
+
+// ── PROJECT DATA ──
+const projects = [
+  // Manufactura VE
+  { name: "Tesla Gigafactory (pausada)", cat: "Manufactura VE", state: "Nuevo León", city: "Santa Catarina", lat: 25.667, lng: -100.467, investment: 5000, status: "Pausado", year: 2023, note: "4,200 acres en corredor industrial de Santa Catarina; pausada por incertidumbre arancelaria" },
+  { name: "BMW NEUE KLASSE", cat: "Manufactura VE", state: "San Luis Potosí", city: "Villa de Reyes", lat: 22.05, lng: -100.87, investment: 870, status: "En construcci\u00f3n", year: 2023, note: "Parque Industrial Logistik II, Villa de Reyes; EUR 800M; VE + batería desde 2027" },
+  { name: "GM Ramos Arizpe Complejo VE", cat: "Manufactura VE", state: "Coahuila", city: "Ramos Arizpe", lat: 25.508, lng: -100.976, investment: 1000, status: "Operativo", year: 2021, note: "Carretera Saltillo-Monterrey Km 7.5; Equinox EV, Blazer EV, Cadillac Optiq" },
+  { name: "Stellantis Ram ProMaster EV", cat: "Manufactura VE", state: "Coahuila", city: "Saltillo", lat: 25.385, lng: -100.855, investment: 200, status: "Operativo", year: 2023, note: "Planta de ensamble Saltillo; Ram ProMaster eléctrica 2024" },
+  { name: "VW Puebla Expansión VE", cat: "Manufactura VE", state: "Puebla", city: "Cuautlancingo", lat: 19.1197, lng: -98.2483, investment: 764, status: "En construcci\u00f3n", year: 2022, note: "Autopista México-Puebla Km 116, San Lorenzo Almecatla; SUVs eléctricos desde 2026" },
+  { name: "Ford Irapuato Línea Drive-Unit", cat: "Manufactura VE", state: "Guanajuato", city: "Irapuato", lat: 20.695, lng: -101.378, investment: 300, status: "Operativo", year: 2023, note: "Planta de transmisiones Ford Irapuato; unidad motriz para Mustang Mach-E" },
+  { name: "BYD Planta (planeada)", cat: "Manufactura VE", state: "Jalisco", city: "Guadalajara", lat: 20.635, lng: -103.295, investment: 600, status: "Planeado", year: 2024, note: "~150K vehículos/año; 10,000 empleos; sitio final por confirmar" },
+  { name: "Giant Motors (JAC) Ensamble VE", cat: "Manufactura VE", state: "Hidalgo", city: "Cd. Sahagún", lat: 19.789, lng: -98.582, investment: 161, status: "En construcci\u00f3n", year: 2025, note: "Complejo industrial Ciudad Sahagún; ensamble y pruebas VE" },
+  { name: "Jetour (Chery) Planta", cat: "Manufactura VE", state: "Guanajuato", city: "Silao", lat: 20.948, lng: -101.428, investment: 3000, status: "Planeado", year: 2024, note: "US$3B inversión en región del Bajío; corredor Silao-León" },
+  { name: "Solarever Ensamble VE", cat: "Manufactura VE", state: "Durango", city: "Durango", lat: 24.005, lng: -104.623, investment: 200, status: "En construcci\u00f3n", year: 2024, note: "Planta de ensamble VE junto a mega-fábrica solar" },
+  { name: "BRP Motos Eléctricas y Baterias", cat: "Manufactura VE", state: "Querétaro", city: "Querétaro", lat: 20.482, lng: -100.345, investment: 65, status: "En construcci\u00f3n", year: 2022, note: "Operaciones BRP Querétaro; baterías VE y motocicletas eléctricas" },
+  { name: "Olinia (VE nacional)", cat: "Manufactura VE", state: "Ciudad de México", city: "Ciudad de México", lat: 19.362, lng: -99.065, investment: null, status: "En desarrollo", year: 2025, note: "Primer VE diseñado y ensamblado en México; prototipo para Copa del Mundo 2026" },
+
+  // Manufactura de baterias
+  { name: "BMW Ensamble Baterías SLP", cat: "Manufactura de bater\u00edas", state: "San Luis Potosí", city: "Villa de Reyes", lat: 22.035, lng: -100.895, investment: 545, status: "En construcci\u00f3n", year: 2023, note: "Co-ubicada con planta BMW, Logistik II; EUR 500M ensamble baterías alta tensión" },
+  { name: "Cenntro Planta Baterías", cat: "Manufactura de bater\u00edas", state: "Nuevo León", city: "Apodaca", lat: 25.782, lng: -100.215, investment: 200, status: "Operativo", year: 2022, note: "US$200M en 3 años; baterías litio-ion para VE comerciales" },
+  { name: "Solarever Planta Baterías (planeada)", cat: "Manufactura de bater\u00edas", state: "Jalisco", city: "Zona metro Guadalajara", lat: 20.53, lng: -103.42, investment: 1000, status: "Planeado", year: 2024, note: "US$1B en 4 años para producción de baterías VE" },
+  { name: "Seojin Mobility Componentes Motor", cat: "Manufactura de bater\u00edas", state: "Nuevo León", city: "Zona metro Monterrey", lat: 25.715, lng: -100.315, investment: 160, status: "En construcci\u00f3n", year: 2025, note: "Surcoreana; US$160M para componentes de motor VE" },
+
+  // Centro de datos
+  { name: "Amazon AWS Region Cloud", cat: "Centro de datos", state: "Querétaro", city: "El Marqués", lat: 20.657, lng: -100.298, investment: 5000, status: "En construcci\u00f3n", year: 2024, note: "Calle Productividad, El Marqués; US$5B en 15 años; 3 Zonas de Disponibilidad" },
+  { name: "Microsoft AI y Cloud", cat: "Centro de datos", state: "Querétaro", city: "Querétaro", lat: 20.612, lng: -100.362, investment: 1300, status: "En construcci\u00f3n", year: 2024, note: "US$1.3B para infraestructura de IA y nube" },
+  { name: "Google Cloud Region", cat: "Centro de datos", state: "Querétaro", city: "Querétaro", lat: 20.565, lng: -100.435, investment: null, status: "Planeado", year: 2024, note: "Anunciado julio 2024; operaciones para 2025" },
+  { name: "CloudHQ Complejo Multi-Instalación", cat: "Centro de datos", state: "Querétaro", city: "El Marqués", lat: 20.695, lng: -100.258, investment: 4800, status: "En construcci\u00f3n", year: 2024, note: "50 hectáreas; US$4.8B; ~2,000 empleos" },
+  { name: "Kio Networks DC3", cat: "Centro de datos", state: "Querétaro", city: "Querétaro", lat: 20.525, lng: -100.475, investment: null, status: "En construcci\u00f3n", year: 2023, note: "Tercer centro de datos en Querétaro; 25,000 m2; punto AWS Direct Connect" },
+  { name: "OData QR01 Campus", cat: "Centro de datos", state: "Querétaro", city: "Querétaro", lat: 20.635, lng: -100.505, investment: null, status: "Operativo", year: 2022, note: "Hasta 32MW a plena capacidad" },
+
+  // Semiconductores
+  { name: "Foxconn Nvidia GB200", cat: "Semiconductores", state: "Jalisco", city: "Guadalajara", lat: 20.742, lng: -103.315, investment: 900, status: "En construcci\u00f3n", year: 2024, note: "Mayor ensamble de superchips GB200 del mundo; ~US$900M; planta de 450m" },
+  { name: "QSM Planta Semiconductores", cat: "Semiconductores", state: "Jalisco", city: "Guadalajara", lat: 20.565, lng: -103.398, investment: 12, status: "En construcci\u00f3n", year: 2024, note: "US$12M; ~160 empleos; operativa 2025" },
+  { name: "Intel Centro Innovación", cat: "Semiconductores", state: "Jalisco", city: "Guadalajara", lat: 20.668, lng: -103.455, investment: null, status: "Operativo", year: 2022, note: "Intel Guadalajara Design Center; acuerdo de transferencia tecnológica abril 2022" },
+  { name: "Foxconn Chihuahua Operaciones", cat: "Semiconductores", state: "Chihuahua", city: "Ciudad Juárez", lat: 31.645, lng: -106.395, investment: 500, status: "Operativo", year: 2022, note: "Planta Oscar Flores; expansión para ensamble de servidores IA" },
+  { name: "Programa Kutsari Semiconductores", cat: "Semiconductores", state: "Nacional", city: "Ciudad de México", lat: 19.285, lng: -99.195, investment: null, status: "En desarrollo", year: 2025, note: "Centros nacionales de diseño de chips, patentes aceleradas, reducción de importaciones" },
+
+  // Generacion solar
+  { name: "Complejo Solar Puerto Peñasco", cat: "Generaci\u00f3n solar", state: "Sonora", city: "Puerto Peñasco", lat: 31.30, lng: -113.53, investment: 1600, status: "En expansi\u00f3n", year: 2022, note: "Mayor de LatAm; expansión a 1 GW; Fases III-IV sumando 580 MW + 190 MW almacenamiento" },
+  { name: "CFE Proyectos Solares Coahuila", cat: "Generaci\u00f3n solar", state: "Coahuila", city: "Coahuila", lat: 25.35, lng: -101.95, investment: 826, status: "Planeado", year: 2025, note: "Dos proyectos; 556 MW combinados; construcción desde 2026" },
+  { name: "Planta Solar La Pimienta", cat: "Generaci\u00f3n solar", state: "Campeche", city: "Campeche", lat: 19.84, lng: -90.53, investment: null, status: "Operativo", year: 2022, note: "300 MW; Atlas Renewable Energy; inaugurada nov. 2022" },
+  { name: "Proyectos Solares Sowitec", cat: "Generaci\u00f3n solar", state: "Sonora", city: "Zona Hermosillo", lat: 29.07, lng: -110.96, investment: null, status: "Planeado", year: 2023, note: "Tres proyectos; 570 MW capacidad combinada" },
+  { name: "CSP Solar Térmica (BCS)", cat: "Generaci\u00f3n solar", state: "Baja California Sur", city: "Baja California Sur", lat: 24.14, lng: -110.31, investment: null, status: "Anunciado", year: 2025, note: "Dos proyectos termosolares de concentración con torre central" },
+  { name: "20 Proyectos Renovables Aprobados", cat: "Generaci\u00f3n solar", state: "Nacional (11 estados)", city: "Varios", lat: 23.63, lng: -102.55, investment: 4752, status: "Aprobado", year: 2025, note: "15 solares (2,471 MW) + eólicos; todos con BESS; US$4.75B en 14 empresas" },
+
+  // Manufactura solar
+  { name: "Solarever Planta Tepeji del Río", cat: "Manufactura solar", state: "Hidalgo", city: "Tepeji del Río", lat: 19.885, lng: -99.328, investment: null, status: "Operativo", year: 2022, note: "Parte de la red de 3 plantas de Solarever" },
+  { name: "Solarever Planta Irapuato", cat: "Manufactura solar", state: "Guanajuato", city: "Irapuato", lat: 20.735, lng: -101.335, investment: null, status: "Operativo", year: 2022, note: "Manufactura de paneles" },
+  { name: "Solarever Planta Tecomán", cat: "Manufactura solar", state: "Colima", city: "Tecomán", lat: 18.912, lng: -103.872, investment: null, status: "Operativo", year: 2022, note: "1.1 GW capacidad anual tras expansión 2023" },
+  { name: "Solarever Mega-Planta Durango", cat: "Manufactura solar", state: "Durango", city: "Durango", lat: 24.065, lng: -104.685, investment: 583, status: "En construcci\u00f3n", year: 2024, note: "Fábrica de 1.2 GW celdas+paneles; mayor de Norteamérica; US$582.5M total con planta VE" },
+
+  // Almacenamiento energia
+  { name: "Puerto Peñasco BESS (190 MW)", cat: "Almacenamiento energ\u00eda", state: "Sonora", city: "Puerto Peñasco", lat: 31.28, lng: -113.58, investment: null, status: "En construcci\u00f3n", year: 2024, note: "190 MW co-ubicado con planta solar de 1 GW" },
+  { name: "Eólica Coromuel BESS", cat: "Almacenamiento energ\u00eda", state: "Baja California Sur", city: "La Paz", lat: 24.18, lng: -110.28, investment: null, status: "Operativo", year: 2022, note: "10 MW Wartsila BESS en parque eólico de 50 MW" },
+  { name: "Quartux Almacenamiento C&I", cat: "Almacenamiento energ\u00eda", state: "Nacional", city: "Ciudad de México", lat: 19.42, lng: -99.17, investment: null, status: "Operativo", year: 2022, note: "Pipeline de 300 MWh C&I a oct. 2022; sede en CDMX" },
+  { name: "CFE Programa BESS 574 MW", cat: "Almacenamiento energ\u00eda", state: "Nacional (5 plantas)", city: "Varios", lat: 22.77, lng: -102.58, investment: 223, status: "Planeado", year: 2025, note: "574 MW en 5 plantas FV con baterías; US$223M; en línea para 2027" },
+
+  // Aeroespacial / Drones
+  { name: "GE Aerospace México Expansión", cat: "Aeroespacial / Drones", state: "Querétaro", city: "Querétaro", lat: 20.527, lng: -100.186, investment: 29, status: "En construcci\u00f3n", year: 2025, note: "Parque Aeroespacial Querétaro; MX$550M (~US$29M) expansión" },
+  { name: "Cramex Aeroespacial (Drones)", cat: "Aeroespacial / Drones", state: "Querétaro", city: "Querétaro", lat: 20.555, lng: -100.148, investment: null, status: "Operativo", year: 2024, note: "Cluster Aeroespacial Querétaro; Congreso DroneMex 2025" },
+  { name: "MxD Dron Agrícola", cat: "Aeroespacial / Drones", state: "Querétaro", city: "Querétaro", lat: 20.498, lng: -100.215, investment: null, status: "En desarrollo", year: 2025, note: "Primer dron agrícola hecho en México; 60% componentes locales" },
+  { name: "Adquisiciones Drones Militares", cat: "Aeroespacial / Drones", state: "Nacional", city: "Ciudad de México", lat: 19.44, lng: -99.005, investment: 324, status: "Operativo", year: 2022, note: "US$324M gastados 2022-2023; 308 operaciones" }
+];
+
+// ── MAP ──
+const map = L.map('map', {
+  center: [23.6345, -102.5528],
+  zoom: 5,
+  minZoom: 4,
+  maxZoom: 12,
+  zoomControl: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OpenStreetMap &copy; CARTO',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// ── RADIUS ──
+function getRadius(inv) {
+  if (!inv || inv === 0) return 4;
+  if (inv < 100) return 5;
+  if (inv < 500) return 7;
+  if (inv < 1000) return 9;
+  if (inv < 3000) return 12;
+  return 15;
+}
+
+function formatInv(inv) {
+  if (!inv) return "No divulgado";
+  if (inv >= 1000) return "US$" + (inv / 1000).toFixed(1) + "B";
+  return "US$" + inv + "M";
+}
+
+// ── LAYERS ──
+const layerGroups = {};
+const allMarkers = [];
+let selectedCat = null; // null = show all
+
+Object.keys(CATEGORIES).forEach(cat => {
+  layerGroups[cat] = L.layerGroup().addTo(map);
+});
+
+// ── TOOLTIP ──
+const tooltip = document.getElementById('hover-tooltip');
+const mapEl = document.getElementById('map');
+
+function showTooltip(e, p) {
+  const cat = CATEGORIES[p.cat];
+  const statusColor = STATUS_MAP[p.status] || "#888";
+
+  tooltip.innerHTML = `
+    <div class="ht-cat-bar" style="background:${cat.color}"></div>
+    <div class="ht-name">${p.name}</div>
+    <div class="ht-cat" style="color:${cat.color}">${p.cat}</div>
+    <div class="ht-row"><span class="ht-label">Inversi\u00f3n</span><span class="ht-val">${formatInv(p.investment)}</span></div>
+    <div class="ht-row"><span class="ht-label">Estado</span><span class="ht-val">${p.state}</span></div>
+    <div class="ht-row"><span class="ht-label">Ciudad</span><span class="ht-val">${p.city}</span></div>
+    <div class="ht-row"><span class="ht-label">Estatus</span><span class="ht-val" style="color:${statusColor}">${p.status}</span></div>
+    <div class="ht-row"><span class="ht-label">A\u00f1o</span><span class="ht-val">${p.year}</span></div>
+    ${p.note ? `<div class="ht-note">${p.note}</div>` : ''}
+  `;
+  tooltip.style.display = 'block';
+  positionTooltip(e);
+}
+
+function positionTooltip(e) {
+  const mapRect = mapEl.getBoundingClientRect();
+  let x = e.originalEvent.clientX - mapRect.left + 14;
+  let y = e.originalEvent.clientY - mapRect.top - 10;
+
+  // Keep within map bounds
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  if (x + tw > mapRect.width - 10) x = x - tw - 28;
+  if (y + th > mapRect.height - 10) y = mapRect.height - th - 10;
+  if (y < 10) y = 10;
+
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+function hideTooltip() {
+  tooltip.style.display = 'none';
+}
+
+// ── LEGEND HIGHLIGHT (on hover from markers) ──
+const legendItems = {};
+
+function highlightLegendItem(cat) {
+  Object.entries(legendItems).forEach(([c, el]) => {
+    if (c === cat) {
+      el.classList.add('highlighted');
+      el.classList.remove('dimmed');
+    } else {
+      el.classList.add('dimmed');
+      el.classList.remove('highlighted');
+    }
+  });
+}
+
+function resetLegendHighlight() {
+  // Restore to current selection state
+  Object.entries(legendItems).forEach(([c, el]) => {
+    el.classList.remove('highlighted');
+    if (selectedCat && c !== selectedCat) {
+      el.classList.add('dimmed');
+    } else {
+      el.classList.remove('dimmed');
+    }
+  });
+}
+
+// ── MARKERS ──
+projects.forEach(p => {
+  const cat = CATEGORIES[p.cat];
+  const radius = getRadius(p.investment);
+
+  const marker = L.circleMarker([p.lat, p.lng], {
+    radius: radius,
+    fillColor: cat.color,
+    color: 'rgba(0,0,0,0.3)',
+    weight: 1,
+    fillOpacity: 0.85
+  });
+
+  marker._projectData = p;
+
+  marker.on('mouseover', function(e) {
+    this.setStyle({ weight: 2, color: '#333', fillOpacity: 1 });
+    showTooltip(e, p);
+    highlightLegendItem(p.cat);
+    // Dim other categories on map
+    allMarkers.forEach(m => {
+      if (m._projectData.cat !== p.cat) {
+        m.setStyle({ fillOpacity: 0.15 });
+      }
+    });
+  });
+
+  marker.on('mousemove', function(e) {
+    positionTooltip(e);
+  });
+
+  marker.on('mouseout', function() {
+    this.setStyle({ weight: 1, color: 'rgba(0,0,0,0.3)', fillOpacity: 0.85 });
+    hideTooltip();
+    resetLegendHighlight();
+    // Restore map opacity based on selection
+    allMarkers.forEach(m => {
+      if (selectedCat && m._projectData.cat !== selectedCat) {
+        m.setStyle({ fillOpacity: 0.08 });
+      } else {
+        m.setStyle({ fillOpacity: 0.85 });
+      }
+    });
+  });
+
+  marker.addTo(layerGroups[p.cat]);
+  allMarkers.push(marker);
+});
+
+// ── LEGEND (click = isolate category, click again = show all) ──
+const legendBar = document.getElementById('legendBar');
+Object.entries(CATEGORIES)
+  .sort((a, b) => a[1].order - b[1].order)
+  .forEach(([cat, conf]) => {
+    const count = projects.filter(p => p.cat === cat).length;
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.dataset.cat = cat;
+    item.innerHTML = `<span class="legend-dot" style="background:${conf.color}"></span>${cat} (${count})`;
+
+    item.addEventListener('click', () => {
+      if (selectedCat === cat) {
+        // Deselect: show all
+        selectedCat = null;
+        Object.entries(legendItems).forEach(([c, el]) => el.classList.remove('dimmed', 'highlighted'));
+        allMarkers.forEach(m => m.setStyle({ fillOpacity: 0.85 }));
+      } else {
+        // Select: isolate this category
+        selectedCat = cat;
+        Object.entries(legendItems).forEach(([c, el]) => {
+          if (c === cat) {
+            el.classList.remove('dimmed');
+            el.classList.add('highlighted');
+          } else {
+            el.classList.add('dimmed');
+            el.classList.remove('highlighted');
+          }
+        });
+        allMarkers.forEach(m => {
+          if (m._projectData.cat === cat) {
+            m.setStyle({ fillOpacity: 0.85 });
+          } else {
+            m.setStyle({ fillOpacity: 0.08 });
+          }
+        });
+      }
+      updateStats();
+    });
+
+    legendBar.appendChild(item);
+    legendItems[cat] = item;
+  });
+
+// ── STATS ──
+function updateStats() {
+  const visible = selectedCat
+    ? projects.filter(p => p.cat === selectedCat)
+    : projects;
+  const totalInv = visible.reduce((s, p) => s + (p.investment || 0), 0);
+  const totalProjects = visible.length;
+  const statesSet = new Set(visible.map(p => p.state).filter(s => !s.startsWith("Nacional")));
+  const catsCount = selectedCat ? 1 : Object.keys(CATEGORIES).length;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-block"><div class="stat-val">${totalProjects}</div><div class="stat-label">Proyectos</div></div>
+    <div class="stat-block"><div class="stat-val">US$${(totalInv / 1000).toFixed(1)}B</div><div class="stat-label">Inversi\u00f3n anunciada</div></div>
+    <div class="stat-block"><div class="stat-val">${statesSet.size}</div><div class="stat-label">Estados</div></div>
+    <div class="stat-block"><div class="stat-val">${catsCount}</div><div class="stat-label">Categor\u00edas</div></div>
+  `;
+}
+updateStats();
+</script>
+</body>
+</html>
