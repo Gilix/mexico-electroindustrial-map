@@ -4,94 +4,129 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Despliegue Electroindustrial de M&eacute;xico desde 2022</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+  body { font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; }
 
   .header {
-    background: #fff;
-    padding: 20px 32px 16px;
-    border-bottom: 1px solid #e0e0e0;
+    background: linear-gradient(180deg, #fff 0%, #f5f7fa 100%);
+    padding: 20px 32px 14px;
+    border-bottom: 2px solid #2a4f6d;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 14px;
+  }
+  .header-title-block {
+    flex-shrink: 0;
   }
   .header h1 {
-    font-size: 22px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #2a4f6d;
     margin-bottom: 4px;
+    line-height: 1.15;
+  }
+  .header h1::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 3px;
+    background: #35b38a;
+    margin-bottom: 8px;
   }
   .header .subtitle {
-    font-size: 13px;
+    font-size: 15px;
     color: #666;
-    margin-bottom: 12px;
+    max-width: 420px;
+    line-height: 1.4;
+  }
+  .header-controls {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .legend-bar {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 6px 16px;
     align-items: center;
   }
   .legend-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #444;
+    gap: 7px;
+    font-size: 14px;
+    color: #333;
     cursor: pointer;
     user-select: none;
-    transition: opacity 0.15s, transform 0.15s;
-    padding: 3px 6px;
-    border-radius: 3px;
+    transition: opacity 0.3s ease, transform 0.15s ease, background 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
   }
-  .legend-item.dimmed { opacity: 0.25; }
+  .legend-item:hover { background: rgba(0,0,0,0.04); }
+  .legend-item.dimmed { opacity: 0.2; }
   .legend-item.highlighted {
     opacity: 1;
-    background: rgba(0,0,0,0.05);
-    transform: scale(1.05);
+    background: rgba(42,79,109,0.08);
+    transform: scale(1.03);
   }
   .legend-dot {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    border: 1.5px solid rgba(0,0,0,0.15);
+    border: 1.5px solid rgba(0,0,0,0.12);
     flex-shrink: 0;
   }
 
   /* Layer toggle */
   .layer-toggle {
     display: flex;
-    gap: 4px;
-    margin-top: 10px;
+    gap: 5px;
     align-items: center;
   }
-  .layer-toggle .lt-label {
-    font-size: 11px;
-    color: #888;
-    margin-right: 6px;
+  .layer-toggle .lt-label,
+  .status-toggle .lt-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2a4f6d;
+    margin-right: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
   .layer-btn {
-    font-size: 11px;
-    padding: 4px 10px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    font-size: 13px;
+    padding: 5px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 4px;
     background: #fff;
     color: #555;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.2s ease;
   }
-  .layer-btn:hover { border-color: #999; }
+  .layer-btn:hover { border-color: #2a4f6d; color: #2a4f6d; }
   .layer-btn.active {
-    background: #1a1a1a;
+    background: #2a4f6d;
     color: #fff;
-    border-color: #1a1a1a;
+    border-color: #2a4f6d;
   }
 
   #map {
     width: 100%;
-    height: calc(100vh - 190px);
-    min-height: 500px;
+    height: calc(100vh - 210px);
+    min-height: 450px;
     position: relative;
   }
 
@@ -118,7 +153,7 @@
     line-height: 1.55;
     max-width: 300px;
     display: none;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
   }
   #hover-tooltip .ht-cat-bar {
     height: 3px;
@@ -126,9 +161,10 @@
     margin-bottom: 8px;
   }
   #hover-tooltip .ht-name {
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
     font-size: 13px;
-    color: #1a1a1a;
+    color: #2a4f6d;
     margin-bottom: 2px;
   }
   #hover-tooltip .ht-cat {
@@ -215,19 +251,47 @@
 
   .stats-bar {
     display: flex;
-    gap: 24px;
-    margin-top: 8px;
+    gap: 28px;
     flex-wrap: wrap;
+    align-items: flex-end;
   }
-  .stat-block { text-align: left; }
+  .stat-block {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stat-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #e7eef5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: #2a4f6d;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .stat-text {}
   .stat-block .stat-val {
-    font-size: 18px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: #2a4f6d;
+    line-height: 1.1;
   }
   .stat-block .stat-label {
-    font-size: 11px;
+    font-size: 12px;
     color: #888;
+    line-height: 1.2;
   }
 
   /* Choropleth legend */
@@ -266,29 +330,427 @@
     color: #888;
     margin-top: 2px;
   }
+
+  /* Leaflet SVG transitions */
+  .leaflet-interactive {
+    transition: fill-opacity 0.3s ease, stroke-width 0.2s ease, stroke 0.2s ease;
+  }
+  .leaflet-overlay-pane path {
+    transition: fill-opacity 0.4s ease, fill 0.4s ease;
+  }
+
+  /* Legend enhancements */
+  .legend-cat-name { font-weight: 500; }
+  .legend-count {
+    background: #f0f0f0;
+    border-radius: 8px;
+    padding: 0 5px;
+    font-size: 10px;
+    color: #666;
+    font-weight: 600;
+  }
+  .legend-inv {
+    font-size: 10px;
+    color: #999;
+    font-weight: 400;
+  }
+
+  /* Rich tooltip metrics */
+  .ht-metrics {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+  }
+  .ht-metric-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 10px;
+  }
+  .ht-metric-label {
+    width: 90px;
+    color: #888;
+    flex-shrink: 0;
+    font-size: 10px;
+  }
+  .ht-metric-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: #e8e8e8;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .ht-metric-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .ht-metric-val {
+    width: 28px;
+    text-align: right;
+    font-weight: 600;
+    color: #333;
+    font-size: 10px;
+  }
+
+  /* Status filter toggle */
+  .status-toggle {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .status-btn {
+    font-size: 13px;
+    padding: 5px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 4px;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .status-btn:hover { border-color: #35b38a; color: #35b38a; }
+  .status-btn.active {
+    background: #35b38a;
+    color: #fff;
+    border-color: #35b38a;
+  }
+
+  /* State detail panel */
+  .state-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 340px;
+    height: 100%;
+    background: #fff;
+    z-index: 1500;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.15);
+    overflow-y: auto;
+    padding: 24px 20px;
+    transform: translateX(100%);
+    transition: transform 0.35s ease;
+    font-size: 13px;
+  }
+  .state-panel.open {
+    transform: translateX(0);
+  }
+  .sp-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #666;
+    line-height: 1;
+  }
+  .sp-close:hover { color: #2a4f6d; }
+  .sp-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2a4f6d;
+    margin-bottom: 4px;
+  }
+  .sp-archetype {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #35b38a;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .sp-inv-summary {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #2a4f6d;
+    margin-bottom: 4px;
+  }
+  .sp-inv-label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 16px;
+  }
+  .sp-section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .sp-metric { margin-bottom: 10px; }
+  .sp-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .sp-metric-label { font-size: 12px; color: #555; }
+  .sp-metric-val { font-size: 12px; font-weight: 700; color: #333; }
+  .sp-metric-bar { height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden; }
+  .sp-metric-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+  .sp-projects-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 16px 0 8px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+  }
+  .sp-project {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .sp-project-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  .sp-project-cat {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+  .sp-project-meta { font-size: 11px; color: #888; }
+
+  /* Map annotations */
+  .map-annotation {
+    background: none !important;
+    border: none !important;
+  }
+  .annotation-text {
+    background: rgba(42, 79, 109, 0.92);
+    color: #fff;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    line-height: 1.3;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    pointer-events: none;
+  }
+
+  /* Intro overlay */
+  .intro-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+  }
+  .intro-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .intro-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 36px 32px;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+  .intro-card h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #2a4f6d;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  .intro-card h2::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 3px;
+    background: #35b38a;
+    margin: 0 auto 12px;
+  }
+  .intro-card p {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .intro-instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0 20px;
+    font-size: 13px;
+    color: #666;
+    text-align: left;
+    padding-left: 20px;
+  }
+  .intro-instructions span::before {
+    content: '\2192';
+    margin-right: 8px;
+    color: #35b38a;
+    font-weight: 600;
+  }
+  .intro-dismiss {
+    background: #2a4f6d;
+    color: #fff;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.2s ease;
+  }
+  .intro-dismiss:hover {
+    background: #35b38a;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .header {
+      padding: 14px 16px 12px;
+    }
+    .header-top {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .header h1 {
+      font-size: 20px;
+    }
+    .header .subtitle {
+      font-size: 13px;
+    }
+    .legend-bar {
+      gap: 4px 10px;
+    }
+    .legend-item {
+      font-size: 12px;
+      padding: 2px 4px;
+    }
+    .header-controls {
+      gap: 8px;
+    }
+    .layer-toggle, .status-toggle {
+      flex-wrap: wrap;
+    }
+    .stats-bar {
+      gap: 16px;
+    }
+    .stat-icon { width: 24px; height: 24px; }
+    .stat-icon svg { width: 14px; height: 14px; }
+    .stat-block .stat-val {
+      font-size: 16px;
+    }
+    .stat-block .stat-label {
+      font-size: 10px;
+    }
+    #map {
+      height: calc(100vh - 320px);
+      min-height: 350px;
+    }
+    .source-box {
+      display: none;
+    }
+    .state-panel {
+      width: 100%;
+    }
+    #hover-tooltip {
+      max-width: 240px;
+      font-size: 11px;
+    }
+    .intro-card {
+      margin: 16px;
+      padding: 24px 20px;
+    }
+  }
+  @media (max-width: 480px) {
+    .legend-bar {
+      max-height: 60px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+    }
+    .legend-inv {
+      display: none;
+    }
+    .layer-btn, .status-btn {
+      font-size: 10px;
+      padding: 3px 6px;
+    }
+    .annotation-text {
+      font-size: 9px;
+      max-width: 180px;
+      white-space: normal;
+    }
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>Despliegue Electroindustrial de M&eacute;xico desde 2022</h1>
-  <div class="subtitle">Principales proyectos anunciados y operativos en bater&iacute;as, veh&iacute;culos el&eacute;ctricos, centros de datos, semiconductores, energ&iacute;a solar, almacenamiento y aeroespacial/drones</div>
-  <div class="stats-bar" id="statsBar"></div>
-  <div style="margin-top: 12px;">
-    <div class="legend-bar" id="legendBar"></div>
+<div id="introOverlay" class="intro-overlay">
+  <div class="intro-card">
+    <h2>Despliegue Electroindustrial de M&eacute;xico</h2>
+    <p>45 proyectos anunciados en 8 sectores desde 2022. Explore la inversi&oacute;n, capacidad productiva y brechas de talento por estado.</p>
+    <div class="intro-instructions">
+      <span>Haga clic en la leyenda para filtrar por sector</span>
+      <span>Seleccione una capa base para ver m&eacute;tricas estatales</span>
+      <span>Pase el cursor sobre los marcadores para ver detalles</span>
+      <span>Haga clic en un estado para ver su perfil completo</span>
+    </div>
+    <button onclick="dismissIntro()" class="intro-dismiss">Explorar mapa</button>
   </div>
-  <div class="layer-toggle">
-    <span class="lt-label">Capa base:</span>
-    <button class="layer-btn active" data-layer="relatedness">Afinidad</button>
-    <button class="layer-btn" data-layer="talent">Capital humano</button>
-    <button class="layer-btn" data-layer="students">Egresados</button>
-    <button class="layer-btn" data-layer="energy">Energ&iacute;a renovable</button>
-    <button class="layer-btn" data-layer="none">Ninguna</button>
+</div>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-title-block">
+      <h1>Despliegue Electroindustrial de M&eacute;xico</h1>
+      <div class="subtitle">Inversi&oacute;n, capacidad productiva y brechas de talento por estado desde 2022</div>
+    </div>
+    <div class="stats-bar" id="statsBar"></div>
+  </div>
+  <div class="legend-bar" id="legendBar"></div>
+  <div class="header-controls" style="margin-top: 10px;">
+    <div class="layer-toggle">
+      <span class="lt-label">Capa:</span>
+      <button class="layer-btn active" data-layer="relatedness">Afinidad</button>
+      <button class="layer-btn" data-layer="talent">Capital humano</button>
+      <button class="layer-btn" data-layer="students">Egresados</button>
+      <button class="layer-btn" data-layer="energy">Energ&iacute;a renovable</button>
+      <button class="layer-btn" data-layer="none">Ninguna</button>
+    </div>
+    <div class="status-toggle" id="statusToggle">
+      <span class="lt-label">Estatus:</span>
+      <button class="status-btn active" data-status="all">Todos</button>
+      <button class="status-btn" data-status="Operativo">Operativo</button>
+      <button class="status-btn" data-status="En construcci&oacute;n">En construcci&oacute;n</button>
+      <button class="status-btn" data-status="Planeado">Planeado</button>
+      <button class="status-btn" data-status="Pausado">Pausado</button>
+    </div>
   </div>
 </div>
 
 <div id="map">
   <div id="hover-tooltip"></div>
+  <div id="statePanel" class="state-panel">
+    <button class="sp-close" onclick="closeStatePanel()">&times;</button>
+    <div id="statePanelContent"></div>
+  </div>
 </div>
 
 <div class="choro-legend" id="choroLegend">
@@ -314,7 +776,7 @@
 
 <div class="footer">
   <span>Tama&ntilde;o del c&iacute;rculo proporcional a la inversi&oacute;n anunciada. Haga clic en la leyenda o en un marcador para aislar una categor&iacute;a. Pase el cursor para ver detalles.</span>
-  <span>Mapa &copy; OpenStreetMap &amp; CARTO</span>
+  <span><a href="https://grippoint.co" style="color:#2a4f6d;text-decoration:none;font-weight:600">GripPoint</a> &middot; Mapa &copy; OpenStreetMap &amp; CARTO</span>
 </div>
 
 <script>
@@ -444,12 +906,11 @@ const LAYER_LABELS = {
 };
 
 // Color scale: white to dark green
+const CHORO_COLORS = ['#f7f7f7', '#e7eef5', '#b8d4e3', '#7ebfad', '#4da882', '#35b38a', '#1a6b52'];
 function getColor(value) {
   if (value <= 0) return '#f7f7f7';
-  // 5-step sequential: white -> light green -> dark green
-  const colors = ['#f7fcf5', '#c7e9c0', '#74c476', '#31a354', '#006d2c'];
-  const idx = Math.min(Math.floor(value * 4.99), 4);
-  return colors[idx];
+  const idx = Math.min(Math.floor(value * 6.99), 6);
+  return CHORO_COLORS[idx];
 }
 
 function getStateScore(stateId, metric) {
@@ -523,7 +984,7 @@ function updateChoropleth() {
   const catSuffix = activeLayer === 'energy' ? ' (MW eólica + FV)' : (selectedCat ? (' (' + selectedCat + ')') : ' (promedio)');
   document.getElementById('choroTitle').textContent = title + catSuffix;
   const bar = document.getElementById('choroBar');
-  bar.innerHTML = ['#f7fcf5','#c7e9c0','#74c476','#31a354','#006d2c']
+  bar.innerHTML = CHORO_COLORS
     .map(c => '<div style="background:' + c + '"></div>').join('');
   legend.style.display = 'block';
 }
@@ -599,6 +1060,7 @@ const layerGroups = {};
 const allMarkers = [];
 const glowMarkers = [];
 let selectedCat = null;
+let selectedStatus = 'all';
 
 // Apply visual styling when a category is selected/deselected
 function applyMarkerSelection() {
@@ -607,14 +1069,21 @@ function applyMarkerSelection() {
   glowMarkers.length = 0;
 
   allMarkers.forEach(m => {
-    const r = getRadius(m._projectData.investment);
+    const p = m._projectData;
+    const r = getRadius(p.investment);
+    const statusMatch = selectedStatus === 'all' || p.status === selectedStatus;
+
     if (!selectedCat) {
-      m.setStyle({ fillOpacity: 0.85, weight: 1, color: 'rgba(0,0,0,0.3)' });
-      m.setRadius(r);
-    } else if (m._projectData.cat === selectedCat) {
-      const cat = CATEGORIES[m._projectData.cat];
-      // Outer glow ring behind the marker
-      const glow = L.circleMarker([m._projectData.lat, m._projectData.lng], {
+      if (statusMatch) {
+        m.setStyle({ fillOpacity: 0.85, weight: 1, color: 'rgba(0,0,0,0.3)' });
+        m.setRadius(r);
+      } else {
+        m.setStyle({ fillOpacity: 0.08, weight: 0.5, color: 'rgba(0,0,0,0.05)' });
+        m.setRadius(r);
+      }
+    } else if (p.cat === selectedCat && statusMatch) {
+      const cat = CATEGORIES[p.cat];
+      const glow = L.circleMarker([p.lat, p.lng], {
         pane: 'glowPane',
         radius: r + 6,
         fillColor: cat.color,
@@ -624,7 +1093,6 @@ function applyMarkerSelection() {
         opacity: 0.7
       }).addTo(map);
       glowMarkers.push(glow);
-      // Main marker: bright, white stroke
       m.setStyle({ fillOpacity: 1, weight: 2.5, color: '#fff' });
       m.setRadius(r + 2);
     } else {
@@ -632,6 +1100,7 @@ function applyMarkerSelection() {
       m.setRadius(r);
     }
   });
+  updateAnnotations();
 }
 
 Object.keys(CATEGORIES).forEach(cat => {
@@ -646,19 +1115,32 @@ function showTooltip(e, p) {
   const cat = CATEGORIES[p.cat];
   const statusColor = STATUS_MAP[p.status] || "#888";
 
-  // State score line if choropleth is active
-  let scoreLine = '';
-  if (activeLayer !== 'none' && p.stateId) {
+  // Always show all 4 metrics for the project's state
+  let metricsHTML = '';
+  if (p.stateId) {
     const sdata = STATE_SCORES[String(p.stateId)];
     if (sdata) {
-      const val = activeLayer === 'energy' ? (sdata.energy || 0) : ((sdata[activeLayer] || {})[p.cat] || 0);
-      const label = LAYER_LABELS[activeLayer];
-      scoreLine = `
-        <div class="ht-score">
-          <div class="ht-row"><span class="ht-label">${label} (${sdata.name})</span><span class="ht-val">${(val*100).toFixed(0)}%</span></div>
-          <div class="ht-score-bar"><div class="ht-score-fill" style="width:${val*100}%;background:${getColor(val)}"></div></div>
-        </div>
-      `;
+      const metrics = [
+        { key: 'relatedness', label: 'Afinidad', color: '#2a4f6d' },
+        { key: 'talent', label: 'Capital humano', color: '#35b38a' },
+        { key: 'students', label: 'Egresados', color: '#32465a' },
+        { key: 'energy', label: 'Energ\u00eda renovable', color: '#e89b3f' }
+      ];
+      metricsHTML = '<div class="ht-metrics">';
+      metrics.forEach(m => {
+        const val = m.key === 'energy'
+          ? (sdata.energy || 0)
+          : ((sdata[m.key] || {})[p.cat] || 0);
+        metricsHTML += `
+          <div class="ht-metric-row">
+            <span class="ht-metric-label">${m.label}</span>
+            <div class="ht-metric-bar-bg">
+              <div class="ht-metric-bar-fill" style="width:${val*100}%;background:${m.color}"></div>
+            </div>
+            <span class="ht-metric-val">${(val*100).toFixed(0)}%</span>
+          </div>`;
+      });
+      metricsHTML += '</div>';
     }
   }
 
@@ -672,7 +1154,7 @@ function showTooltip(e, p) {
     <div class="ht-row"><span class="ht-label">Estatus</span><span class="ht-val" style="color:${statusColor}">${p.status}</span></div>
     <div class="ht-row"><span class="ht-label">A\u00f1o</span><span class="ht-val">${p.year}</span></div>
     ${p.note ? '<div class="ht-note">' + p.note + '</div>' : ''}
-    ${scoreLine}
+    ${metricsHTML}
   `;
   tooltip.style.display = 'block';
   positionTooltip(e);
@@ -785,11 +1267,12 @@ const legendBar = document.getElementById('legendBar');
 Object.entries(CATEGORIES)
   .sort((a, b) => a[1].order - b[1].order)
   .forEach(([cat, conf]) => {
-    const count = projects.filter(p => p.cat === cat).length;
+    const catProjects = projects.filter(p => p.cat === cat);
+    const count = catProjects.length;
     const item = document.createElement('div');
     item.className = 'legend-item';
     item.dataset.cat = cat;
-    item.innerHTML = '<span class="legend-dot" style="background:' + conf.color + '"></span>' + cat + ' (' + count + ')';
+    item.innerHTML = '<span class="legend-dot" style="background:' + conf.color + '"></span><span class="legend-cat-name">' + cat + '</span><span class="legend-count">' + count + '</span>';
 
     item.addEventListener('click', () => {
       if (selectedCat === cat) {
@@ -813,21 +1296,287 @@ Object.entries(CATEGORIES)
 
 // ── STATS ──
 function updateStats() {
-  const visible = selectedCat
+  let visible = selectedCat
     ? projects.filter(p => p.cat === selectedCat)
     : projects;
+  if (selectedStatus !== 'all') {
+    visible = visible.filter(p => p.status === selectedStatus);
+  }
   const totalInv = visible.reduce((s, p) => s + (p.investment || 0), 0);
   const totalProjects = visible.length;
   const statesSet = new Set(visible.map(p => p.state).filter(s => !s.startsWith("Nacional")));
-  const catsCount = selectedCat ? 1 : Object.keys(CATEGORIES).length;
+
+  let contextHTML = '';
+  if (selectedCat) {
+    const byState = {};
+    visible.forEach(p => {
+      if (p.state.startsWith("Nacional")) return;
+      byState[p.state] = (byState[p.state] || 0) + (p.investment || 0);
+    });
+    const topState = Object.entries(byState).sort((a,b) => b[1] - a[1])[0];
+    if (topState) {
+      contextHTML = `<div class="stat-block"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></div><div class="stat-text"><div class="stat-val">${topState[0]}</div><div class="stat-label">Mayor inversi\u00f3n</div></div></div>`;
+    }
+  } else {
+    const catsCount = Object.keys(CATEGORIES).length;
+    contextHTML = `<div class="stat-block"><div class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="stat-text"><div class="stat-val">${catsCount}</div><div class="stat-label">Sectores</div></div></div>`;
+  }
+
+  const iconProjects = '<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><path d="M12 9v4l-6 4m6-4l6 4"/></svg>';
+  const iconInv = '<svg viewBox="0 0 24 24"><path d="M12 2v20m-5-4l5 4 5-4"/><path d="M5 12h14"/></svg>';
+  const iconStates = '<svg viewBox="0 0 24 24"><path d="M3 7l6-4 6 4 6-4v14l-6 4-6-4-6 4V7z"/></svg>';
+  const iconCat = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
 
   document.getElementById('statsBar').innerHTML = `
-    <div class="stat-block"><div class="stat-val">${totalProjects}</div><div class="stat-label">Proyectos</div></div>
-    <div class="stat-block"><div class="stat-val">US$${(totalInv / 1000).toFixed(1)}B</div><div class="stat-label">Inversi\u00f3n anunciada</div></div>
-    <div class="stat-block"><div class="stat-val">${statesSet.size}</div><div class="stat-label">Estados</div></div>
-    <div class="stat-block"><div class="stat-val">${catsCount}</div><div class="stat-label">Categor\u00edas</div></div>
+    <div class="stat-block"><div class="stat-icon">${iconProjects}</div><div class="stat-text"><div class="stat-val">${totalProjects}</div><div class="stat-label">Proyectos</div></div></div>
+    <div class="stat-block"><div class="stat-icon">${iconInv}</div><div class="stat-text"><div class="stat-val">US$${(totalInv / 1000).toFixed(1)}B</div><div class="stat-label">Inversi\u00f3n</div></div></div>
+    <div class="stat-block"><div class="stat-icon">${iconStates}</div><div class="stat-text"><div class="stat-val">${statesSet.size}</div><div class="stat-label">Estados</div></div></div>
+    ${contextHTML}
   `;
 }
+// ── STATUS FILTER ──
+document.querySelectorAll('.status-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    selectedStatus = this.dataset.status;
+    applyFilters();
+  });
+});
+
+function applyFilters() {
+  allMarkers.forEach(m => {
+    const p = m._projectData;
+    const catMatch = !selectedCat || p.cat === selectedCat;
+    const statusMatch = selectedStatus === 'all' || p.status === selectedStatus;
+
+    if (catMatch && statusMatch) {
+      m.setStyle({ fillOpacity: 0.85, weight: 1, color: 'rgba(0,0,0,0.3)' });
+      m.setRadius(getRadius(p.investment));
+      if (m.getElement()) m.getElement().style.pointerEvents = '';
+    } else if (catMatch && !statusMatch) {
+      m.setStyle({ fillOpacity: 0.08, weight: 0.5, color: 'rgba(0,0,0,0.05)' });
+      m.setRadius(getRadius(p.investment));
+      if (m.getElement()) m.getElement().style.pointerEvents = 'none';
+    } else {
+      m.setStyle({ fillOpacity: 0.08, weight: 0.5, color: 'rgba(0,0,0,0.05)' });
+      m.setRadius(getRadius(p.investment));
+      if (m.getElement()) m.getElement().style.pointerEvents = selectedCat ? 'none' : '';
+    }
+  });
+
+  // Re-apply glow for selected category
+  glowMarkers.forEach(g => map.removeLayer(g));
+  glowMarkers.length = 0;
+  if (selectedCat) {
+    allMarkers.forEach(m => {
+      const p = m._projectData;
+      if (p.cat === selectedCat && (selectedStatus === 'all' || p.status === selectedStatus)) {
+        const r = getRadius(p.investment);
+        const cat = CATEGORIES[p.cat];
+        const glow = L.circleMarker([p.lat, p.lng], {
+          pane: 'glowPane',
+          radius: r + 6,
+          fillColor: cat.color,
+          fillOpacity: 0.35,
+          color: '#fff',
+          weight: 2,
+          opacity: 0.7
+        }).addTo(map);
+        glowMarkers.push(glow);
+        m.setStyle({ fillOpacity: 1, weight: 2.5, color: '#fff' });
+        m.setRadius(r + 2);
+      }
+    });
+  }
+
+  updateAnnotations();
+  updateStats();
+  updateChoropleth();
+}
+
+// ── STATE DETAIL PANEL ──
+function getArchetype(stateId) {
+  const sdata = STATE_SCORES[String(stateId)];
+  if (!sdata) return '';
+  const stateProjects = projects.filter(p => p.stateId === stateId);
+  const totalInv = stateProjects.reduce((s, p) => s + (p.investment || 0), 0);
+  const talentScores = Object.values(sdata.talent || {});
+  const avgTalent = talentScores.length ? talentScores.reduce((a,b) => a + b, 0) / talentScores.length : 0;
+
+  if (totalInv > 2000 && avgTalent < 0.35) return 'Capital abundante, talento limitado';
+  if (totalInv < 500 && avgTalent > 0.5) return 'Talento abundante, capital ausente';
+  if (totalInv > 1000 && avgTalent > 0.4) return 'Equilibrado';
+  return '';
+}
+
+function openStatePanel(stateId) {
+  const sdata = STATE_SCORES[String(stateId)];
+  if (!sdata) return;
+
+  const stateProjects = projects.filter(p => p.stateId === stateId);
+  const totalInv = stateProjects.reduce((s, p) => s + (p.investment || 0), 0);
+  const archetype = getArchetype(stateId);
+
+  const metrics = [
+    { key: 'relatedness', label: 'Afinidad productiva', color: '#2a4f6d' },
+    { key: 'talent', label: 'Capital humano', color: '#35b38a' },
+    { key: 'students', label: 'Egresados', color: '#32465a' },
+    { key: 'energy', label: 'Energ\u00eda renovable', color: '#e89b3f' }
+  ];
+
+  let metricsHTML = metrics.map(m => {
+    let val;
+    if (m.key === 'energy') {
+      val = sdata.energy || 0;
+    } else {
+      const scores = sdata[m.key] || {};
+      const vals = Object.values(scores);
+      val = vals.length ? vals.reduce((a,b) => a + b, 0) / vals.length : 0;
+    }
+    return `
+      <div class="sp-metric">
+        <div class="sp-metric-header">
+          <span class="sp-metric-label">${m.label}</span>
+          <span class="sp-metric-val">${(val*100).toFixed(0)}%</span>
+        </div>
+        <div class="sp-metric-bar"><div class="sp-metric-fill" style="width:${val*100}%;background:${m.color}"></div></div>
+      </div>`;
+  }).join('');
+
+  const sortedProjects = stateProjects.sort((a,b) => (b.investment || 0) - (a.investment || 0));
+  let projectsHTML = sortedProjects.length
+    ? sortedProjects.map(p => {
+        const catColor = (CATEGORIES[p.cat] || {}).color || '#888';
+        const statusColor = STATUS_MAP[p.status] || '#888';
+        return `
+        <div class="sp-project">
+          <div class="sp-project-name"><span class="sp-project-cat" style="background:${catColor}"></span>${p.name}</div>
+          <div class="sp-project-meta">${formatInv(p.investment)} &middot; <span style="color:${statusColor}">${p.status}</span> &middot; ${p.year}</div>
+        </div>`;
+      }).join('')
+    : '<div style="color:#999;font-size:12px;padding:8px 0">Sin proyectos registrados</div>';
+
+  document.getElementById('statePanelContent').innerHTML = `
+    <div class="sp-title">${sdata.name}</div>
+    ${archetype ? '<div class="sp-archetype">' + archetype + '</div>' : ''}
+    <div class="sp-inv-summary">${formatInv(totalInv)}</div>
+    <div class="sp-inv-label">${stateProjects.length} proyecto${stateProjects.length !== 1 ? 's' : ''}</div>
+    <div class="sp-section-title">M\u00e9tricas (promedio)</div>
+    ${metricsHTML}
+    <div class="sp-projects-title">Proyectos</div>
+    ${projectsHTML}
+  `;
+  document.getElementById('statePanel').classList.add('open');
+}
+
+function closeStatePanel() {
+  document.getElementById('statePanel').classList.remove('open');
+}
+
+// ── MAP ANNOTATIONS ──
+const annotationData = [
+  { lat: 20.55, lng: -99.5, text: 'Quer\u00e9taro: $11.2B inversi\u00f3n, 0 MW renovable' },
+  { lat: 26.2, lng: -99.5, text: 'Tesla Gigafactory: $5B, pausada' },
+  { lat: 18.8, lng: -99.15, text: 'CDMX+EdoMex: 297K trabajadores, ~$0 inversi\u00f3n' }
+];
+
+const annotationLayer = L.layerGroup();
+annotationData.forEach(a => {
+  L.marker([a.lat, a.lng], {
+    icon: L.divIcon({
+      className: 'map-annotation',
+      html: '<div class="annotation-text">' + a.text + '</div>',
+      iconSize: [220, 30],
+      iconAnchor: [-10, 15]
+    }),
+    interactive: false,
+    pane: 'markerPane'
+  }).addTo(annotationLayer);
+});
+annotationLayer.addTo(map);
+
+function updateAnnotations() {
+  if (selectedCat || map.getZoom() > 7) {
+    map.removeLayer(annotationLayer);
+  } else if (!map.hasLayer(annotationLayer)) {
+    annotationLayer.addTo(map);
+  }
+}
+map.on('zoomend', updateAnnotations);
+
+// Close tooltip on map click (mobile-friendly)
+map.on('click', function() {
+  hideTooltip();
+});
+
+// ── INTRO OVERLAY ──
+function dismissIntro() {
+  const overlay = document.getElementById('introOverlay');
+  overlay.classList.add('hidden');
+  setTimeout(function() { overlay.style.display = 'none'; }, 400);
+}
+setTimeout(dismissIntro, 10000);
+
+// ── CHOROPLETH CLICK → STATE PANEL ──
+// Patch choropleth onEachFeature to add click handler
+const _origUpdateChoropleth = updateChoropleth;
+
+updateChoropleth = function() {
+  if (choroplethLayer) {
+    map.removeLayer(choroplethLayer);
+    choroplethLayer = null;
+  }
+
+  const legend = document.getElementById('choroLegend');
+
+  if (activeLayer === 'none') {
+    legend.style.display = 'none';
+    return;
+  }
+
+  choroplethLayer = L.geoJSON(STATE_GEO, {
+    pane: 'choroplethPane',
+    style: function(feature) {
+      const sid = feature.properties.state_id;
+      const val = getStateScore(sid, activeLayer);
+      return {
+        fillColor: getColor(val),
+        weight: 1,
+        opacity: 0.7,
+        color: '#999',
+        fillOpacity: 0.65
+      };
+    },
+    onEachFeature: function(feature, layer) {
+      layer.on({
+        mouseover: function(e) {
+          this.setStyle({ weight: 2, color: '#333' });
+          showStateTooltip(e, feature.properties);
+        },
+        mousemove: function(e) {
+          positionTooltip(e);
+        },
+        mouseout: function(e) {
+          choroplethLayer.resetStyle(this);
+          hideTooltip();
+        },
+        click: function(e) {
+          openStatePanel(feature.properties.state_id);
+        }
+      });
+    }
+  }).addTo(map);
+
+  const title = LAYER_LABELS[activeLayer] || '';
+  const catSuffix = activeLayer === 'energy' ? ' (MW e\u00f3lica + FV)' : (selectedCat ? (' (' + selectedCat + ')') : ' (promedio)');
+  document.getElementById('choroTitle').textContent = title + catSuffix;
+  const bar = document.getElementById('choroBar');
+  bar.innerHTML = CHORO_COLORS
+    .map(c => '<div style="background:' + c + '"></div>').join('');
+  legend.style.display = 'block';
+};
+
 updateStats();
 updateChoropleth();
 </script>
